@@ -1,68 +1,34 @@
-const inquirer = require("inquirer");
-const fs = require("fs").promises;
-// statische variable
-const CHOICE_GET = "Get a password";
-const CHOICE_SET = "Set a password";
+const {
+  askStartQuestions,
+  askGetPasswordQuestions,
+  askSetPasswordQuestions,
+  CHOICE_GET,
+  CHOICE_SET,
+} = require("./lib/questions");
+const { readPassword } = require("./lib/passwords");
 
-const questionsStart = [
-  {
-    type: "password",
-    name: "password",
-    message: "What's your master password?",
-  },
-  {
-    type: "list",
-    name: "action",
-    message: "What do you want to do?",
-    choices: [CHOICE_GET, CHOICE_SET],
-  },
-];
+async function main() {
+  const { masterPassword, action } = await askStartQuestions();
 
-const questionsGet = [
-  {
-    type: "input",
-    name: "key",
-    message: "Which password do you need?",
-  },
-];
-
-const questionsSet = [
-  {
-    type: "input",
-    name: "key",
-    message: "Which password do you like to set?",
-  },
-  {
-    type: "password",
-    name: "password",
-    message: "Please enter the password",
-  },
-];
-
-inquirer.prompt(questionsStart).then((answersStart) => {
-  if (answersStart.password === "123") {
-    console.log("password correct");
-
-    if (answersStart.action === CHOICE_GET) {
+  if (masterPassword === "123") {
+    console.log("Master Password is correct!");
+    if (action === CHOICE_GET) {
       console.log("Now Get a password");
-      inquirer.prompt(questionsGet).then(async (answersGet) => {
-        try {
-          const passwordsJSON = await fs.readFile("./password.json", "utf-8");
-          const passwords = JSON.parse(passwordsJSON);
-          console.log(
-            `Your ${answersGet.key} password is ${passwords[answersGet.key]}`
-          );
-        } catch (error) {
-          console.error("ERROR!");
-        }
-      });
-    } else if (answersStart.action === CHOICE_SET) {
+      const { key } = await askGetPasswordQuestions();
+      try {
+        const password = await readPassword(key);
+        console.log(`Your ${key} password is ${password}`);
+      } catch (error) {
+        console.error("ERROR!");
+      }
+    } else if (action === CHOICE_SET) {
       console.log("Now Set a password");
-      inquirer.prompt(questionsSet).then(async (answersSet) => {
-        console.log(`New Password: ${answersSet.key} = ${answersSet.password}`);
-      });
+      const { key, password } = await askSetPasswordQuestions();
+      console.log(`New Password: ${key} = ${password}`);
     }
   } else {
-    console.log("wrong password!");
+    console.log("wrong Master Password");
   }
-});
+}
+
+main();
