@@ -12,20 +12,22 @@ const {
   readMasterPassword,
   writeMasterPassword,
 } = require("./lib/passwords");
-const { encrypt, decrypt } = require("./lib/crypto");
+const { encrypt, decrypt, createHash, verifyHash } = require("./lib/crypto");
 
 async function main() {
   const originalMasterPassword = await readMasterPassword();
+
   if (!originalMasterPassword) {
     const { newMasterPassword } = await askForNewMasterPassword();
-    await writeMasterPassword(newMasterPassword);
+    const hashedPassword = createHash(newMasterPassword);
+    await writeMasterPassword(hashedPassword);
     console.log("Master Password set!");
     return;
   }
 
   const { masterPassword, action } = await askStartQuestions();
 
-  if (masterPassword !== originalMasterPassword) {
+  if (!verifyHash(masterPassword, originalMasterPassword)) {
     console.log("Master Password is incorrect!");
     return;
   }
