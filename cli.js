@@ -6,7 +6,7 @@ const {
   CHOICE_SET,
 } = require("./lib/questions");
 const { readPassword, writePassword } = require("./lib/passwords");
-const { encrypt } = require("./lib/crypto");
+const { encrypt, decrypt } = require("./lib/crypto");
 
 async function main() {
   const { masterPassword, action } = await askStartQuestions();
@@ -17,8 +17,8 @@ async function main() {
       console.log("Now Get a password");
       const { key } = await askGetPasswordQuestions();
       try {
-        const password = await readPassword(key);
-
+        const encryptedPassword = await readPassword(key);
+        const password = decrypt(encryptedPassword, masterPassword);
         console.log(`Your ${key} password is ${password}`);
       } catch (error) {
         console.error("ERROR!");
