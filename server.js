@@ -2,9 +2,11 @@ require("dotenv").config();
 const express = require("express");
 const createPasswordsRouter = require("./routes/passwordsRoutes");
 const createUsersRouter = require("./routes/usersRoutes");
+
 const { MongoClient } = require("mongodb");
 //Inhalt (body ) wird analysiert un dem wird ein Wert gegeben
 const bodyParser = require("body-parser");
+const cookieParser = require("cookie-parser");
 const app = express();
 
 const client = new MongoClient(process.env.MONGO_URI, {
@@ -12,6 +14,7 @@ const client = new MongoClient(process.env.MONGO_URI, {
 });
 //app.use middelware- alle Anfrgaen werden zuerst in app.use bearbeitet( alle Routes)
 app.use(bodyParser.json());
+app.use(cookieParser());
 
 app.use((request, response, next) => {
   console.log(`Request ${request.method} on ${request.url}`);

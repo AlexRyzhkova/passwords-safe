@@ -1,4 +1,5 @@
 const express = require("express");
+const jwt = require("jsonwebtoken");
 
 function createUsersRouter(database) {
   const router = express.Router();
@@ -13,7 +14,10 @@ function createUsersRouter(database) {
         response.status(401).send("Wrong username");
         return;
       }
-      console.log(user);
+      const token = jwt.sign({ username }, process.env.JWT_SECRET, {
+        expiresIn: "360s",
+      });
+
       response.send("Logged in");
     } catch (error) {
       console.error(error);
