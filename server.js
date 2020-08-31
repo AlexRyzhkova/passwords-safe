@@ -17,6 +17,11 @@ const app = express();
 //app.use middelware- alle Anfrgaen werden zuerst in app.use bearbeitet( alle Ruten)
 app.use(bodyParser.json());
 
+app.use((request, response, next) => {
+  console.log(`Request ${request.method} on ${request.url}`);
+  next();
+});
+
 async function main() {
   await client.connect();
 
