@@ -4,7 +4,7 @@ require("dotenv").config();
 
 //distruction classe
 const { MongoClient } = require("mongodb");
-const { readPassword } = require("./lib/passwords");
+const { readPassword, writePassword } = require("./lib/passwords");
 const { decrypt, encrypt } = require("./lib/crypto");
 //Inhalt (body ) wird analysiert un dem wird ein Wert gegeben
 const bodyParser = require("body-parser");
@@ -24,7 +24,7 @@ async function main() {
 
   //die Methode legt den Endpunkt fest
   //:alles was hinter / steht wird unter name gespeichert
-  app.get("/api/password/:name", async (request, response) => {
+  app.get("/api/passwords/:name", async (request, response) => {
     try {
       //params url
       const { name } = request.params;
@@ -42,11 +42,15 @@ async function main() {
   });
 
   app.post("/api/passwords", async (request, response) => {
-    console.log("POST a password");
-    const { name, value } = request.body;
-    const encryptedPassword = encrypt(value, masterPassword);
-    await writePassword(name, encryptedPassword, database);
-    response.send("Password created");
+    try {
+      const { name, value } = request.body;
+      const encryptedPassword = encrypt(value, masterPassword);
+      await writePassword(name, encryptedPassword, database);
+      response.status(201).send(`Password ${name} created`);
+    } catch (error) {
+      console.error(error);
+      response.status(500).send(error.message);
+    }
   });
 
   //höre auf folgenden port - listen
