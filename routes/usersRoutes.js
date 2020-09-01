@@ -18,6 +18,8 @@ function createUsersRouter(database) {
         expiresIn: "360s",
       });
 
+      response.setHeader("Set-Cookie", `authToken=${token};path=/;Max-Age=360`);
+
       response.send("Logged in");
     } catch (error) {
       console.error(error);
