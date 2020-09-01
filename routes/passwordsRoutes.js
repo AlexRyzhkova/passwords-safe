@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const { readPassword, writePassword } = require("../lib/passwords");
 const { decrypt, encrypt } = require("../lib/crypto");
+const jwt = require("jsonwebtoken");
 
 function createPasswordRouter(database, masterPassword) {
   //die Methode legt den Endpunkt fest
@@ -10,6 +11,11 @@ function createPasswordRouter(database, masterPassword) {
     try {
       //params url
       const { name } = request.params;
+      const { authToken } = request.cookies;
+
+      const { username } = jwt.verify(authToken, process.env.JWT_SECRET);
+      console.log(`Allow access to ${username}`);
+
       const encryptedPassword = await readPassword(name, database);
       if (!encryptedPassword) {
         response.status(404).send(`Password ${name} not found`);
